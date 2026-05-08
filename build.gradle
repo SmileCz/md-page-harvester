@@ -1,3 +1,5 @@
+import org.gradle.testing.jacoco.tasks.JacocoReport
+
 plugins {
     id("io.micronaut.application") version "4.6.2" apply false
     id("io.micronaut.library") version "4.6.2" apply false
@@ -22,6 +24,8 @@ allprojects {
 
 subprojects {
     pluginManager.withPlugin("java") {
+        apply plugin: "jacoco"
+
         java {
             toolchain {
                 languageVersion = JavaLanguageVersion.of(javaVersion)
@@ -36,6 +40,21 @@ subprojects {
 
         tasks.withType(Test).configureEach {
             useJUnitPlatform()
+            finalizedBy("jacocoTestReport")
+        }
+
+        jacoco {
+            toolVersion = "0.8.14"
+        }
+
+        tasks.named("jacocoTestReport", JacocoReport).configure {
+            dependsOn(tasks.named("test"))
+
+            reports {
+                xml.required = true
+                html.required = true
+                csv.required = false
+            }
         }
 
         dependencies {

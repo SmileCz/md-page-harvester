@@ -1,0 +1,110 @@
+name: Development Build
+
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+    branches:
+      - development
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: development-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gradle-build:
+    name: Gradle Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+
+      - name: Build and test
+        run: ./gradlew clean build --continue --no-daemon
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: ${{ !cancelled() }}
+        with:
+          check_name: Gradle Test Results
+          files: "**/build/test-results/test/TEST-*.xml"
+          comment_mode: off
+
+      - name: Add coverage summary
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          reports = sorted(Path(".").glob("**/build/reports/jacoco/test/jacocoTestReport.xml"))
+          lines = [
+              "## Code Coverage",
+              "",
+              "| Scope | Covered Lines | Missed Lines | Line Coverage |",
+              "| --- | ---: | ---: | ---: |",
+          ]
+          total_covered = 0
+          total_missed = 0
+
+          for report in reports:
+              root = ET.parse(report).getroot()
+              counter = next((item for item in root.findall("counter") if item.attrib.get("type") == "LINE"), None)
+              if counter is None:
+                  continue
+              covered = int(counter.attrib["covered"])
+              missed = int(counter.attrib["missed"])
+              total = covered + missed
+              percent = 100 * covered / total if total else 100.0
+              module = "/".join(report.parts[:2]) if report.parts[0] in {"apps", "modules"} else report.parts[0]
+              lines.append(f"| `{module}` | {covered} | {missed} | {percent:.2f}% |")
+              total_covered += covered
+              total_missed += missed
+
+          total = total_covered + total_missed
+          total_percent = 100 * total_covered / total if total else 100.0
+          lines.append(f"| **Total** | **{total_covered}** | **{total_missed}** | **{total_percent:.2f}%** |")
+
+          Path("coverage-summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          with Path(__import__("os").environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as summary:
+              summary.write("\n".join(lines) + "\n")
+          PY
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/tests/test/**
+            **/build/test-results/test/**
+          if-no-files-found: error
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-reports
+          path: |
+            coverage-summary.md
+            **/build/reports/jacoco/test/**
+          if-no-files-found: error
