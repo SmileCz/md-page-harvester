@@ -4,5 +4,5 @@ plugins {
 
 dependencies {
     implementation(project(":modules:catalog"))
-    implementation(project(":modules:commands"))
+    implementation(project(":modules:cqrs"))
 }

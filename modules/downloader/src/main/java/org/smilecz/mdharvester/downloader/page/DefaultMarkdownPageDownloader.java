@@ -1,8 +1,8 @@
 package org.smilecz.mdharvester.downloader.page;
 
 import jakarta.inject.Singleton;
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageCommand;
-import org.smilecz.mdharvester.commands.download.DownloadedMarkdownPage;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageQuery;
+import org.smilecz.mdharvester.cqrs.download.DownloadedMarkdownPage;
 import java.util.Objects;
 
 @Singleton
@@ -20,10 +20,10 @@ public final class DefaultMarkdownPageDownloader implements MarkdownPageDownload
     }
 
     @Override
-    public DownloadedMarkdownPage download(DownloadMarkdownPageCommand command) {
-        Objects.requireNonNull(command, "command");
-        String content = sourceClient.fetch(command.sourceUri());
-        String fileName = fileNameResolver.resolve(command);
+    public DownloadedMarkdownPage download(DownloadMarkdownPageQuery query) {
+        Objects.requireNonNull(query, "query");
+        String content = sourceClient.fetch(query.sourceUri());
+        String fileName = fileNameResolver.resolve(query);
         return new DownloadedMarkdownPage(fileName, content);
     }
 }

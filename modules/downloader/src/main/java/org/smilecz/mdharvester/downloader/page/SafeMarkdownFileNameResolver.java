@@ -1,7 +1,7 @@
 package org.smilecz.mdharvester.downloader.page;
 
 import jakarta.inject.Singleton;
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageCommand;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageQuery;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
@@ -18,8 +18,8 @@ public final class SafeMarkdownFileNameResolver implements MarkdownFileNameResol
     private static final Pattern REPEATED_DASH = Pattern.compile("-+");
 
     @Override
-    public String resolve(DownloadMarkdownPageCommand command) {
-        String source = TextValues.trimToNull(command.fileNameSource());
+    public String resolve(DownloadMarkdownPageQuery query) {
+        String source = TextValues.trimToNull(query.fileNameSource());
         String basename = sanitize(source == null ? DEFAULT_BASENAME : source);
         return basename + ".md";
     }

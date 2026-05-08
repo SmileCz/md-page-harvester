@@ -8,7 +8,7 @@ Aktuální stav je záměrně jen kostra: aplikace má startovací bod, rozděle
 
 ```text
 apps/service              Micronaut runtime a kompozice celé aplikace
-modules/commands          společné command kontrakty a command bus
+modules/cqrs              společné CQRS kontrakty, command bus a query bus
 modules/api               HTTP rozhraní a budoucí DTO/controllery
 modules/catalog           model zdrojového projektu a metadat Markdown stránek
 modules/downloader        hranice pro stahování Markdown souborů

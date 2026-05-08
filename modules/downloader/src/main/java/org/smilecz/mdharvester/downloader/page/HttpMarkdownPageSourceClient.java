@@ -1,7 +1,7 @@
 package org.smilecz.mdharvester.downloader.page;
 
 import jakarta.inject.Singleton;
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageException;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;

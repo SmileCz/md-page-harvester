@@ -1,16 +1,16 @@
 package org.smilecz.mdharvester.api.page;
 
 import jakarta.inject.Singleton;
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageCommand;
-import org.smilecz.mdharvester.commands.download.InvalidDownloadMarkdownPageCommandException;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageQuery;
+import org.smilecz.mdharvester.cqrs.download.InvalidDownloadMarkdownPageQueryException;
 
 @Singleton
 public final class MarkdownPageDownloadRequestMapper {
 
-    public DownloadMarkdownPageCommand toCommand(MarkdownPageDownloadRequest request) {
+    public DownloadMarkdownPageQuery toQuery(MarkdownPageDownloadRequest request) {
         if (request == null) {
-            throw new InvalidDownloadMarkdownPageCommandException("Request body is required.");
+            throw new InvalidDownloadMarkdownPageQueryException("Request body is required.");
         }
-        return DownloadMarkdownPageCommand.from(request.uri(), request.title(), request.fileName());
+        return DownloadMarkdownPageQuery.from(request.uri(), request.title(), request.fileName());
     }
 }

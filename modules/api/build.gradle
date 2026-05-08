@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":modules:commands"))
+    implementation(project(":modules:cqrs"))
     implementation("io.micronaut:micronaut-http")
 }

@@ -3,8 +3,8 @@ package org.smilecz.mdharvester.api.page;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageCommand;
-import org.smilecz.mdharvester.commands.download.InvalidDownloadMarkdownPageCommandException;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageQuery;
+import org.smilecz.mdharvester.cqrs.download.InvalidDownloadMarkdownPageQueryException;
 import org.junit.jupiter.api.Test;
 
 final class MarkdownPageDownloadRequestMapperTest {
@@ -16,17 +16,17 @@ final class MarkdownPageDownloadRequestMapperTest {
         MarkdownPageDownloadRequest request =
                 new MarkdownPageDownloadRequest(" https://example.com/docs/page.md ", "  Title  ", "  page.md  ");
 
-        DownloadMarkdownPageCommand command = mapper.toCommand(request);
+        DownloadMarkdownPageQuery query = mapper.toQuery(request);
 
-        assertThat(command.sourceUri().toString()).isEqualTo("https://example.com/docs/page.md");
-        assertThat(command.title()).isEqualTo("Title");
-        assertThat(command.requestedFileName()).isEqualTo("page.md");
+        assertThat(query.sourceUri().toString()).isEqualTo("https://example.com/docs/page.md");
+        assertThat(query.title()).isEqualTo("Title");
+        assertThat(query.requestedFileName()).isEqualTo("page.md");
     }
 
     @Test
     void rejectsMissingRequestBody() {
-        assertThatThrownBy(() -> mapper.toCommand(null))
-                .isInstanceOf(InvalidDownloadMarkdownPageCommandException.class)
+        assertThatThrownBy(() -> mapper.toQuery(null))
+                .isInstanceOf(InvalidDownloadMarkdownPageQueryException.class)
                 .hasMessage("Request body is required.");
     }
 
@@ -34,8 +34,8 @@ final class MarkdownPageDownloadRequestMapperTest {
     void rejectsBlankSourceUri() {
         MarkdownPageDownloadRequest request = new MarkdownPageDownloadRequest("   ", "Title", null);
 
-        assertThatThrownBy(() -> mapper.toCommand(request))
-                .isInstanceOf(InvalidDownloadMarkdownPageCommandException.class)
+        assertThatThrownBy(() -> mapper.toQuery(request))
+                .isInstanceOf(InvalidDownloadMarkdownPageQueryException.class)
                 .hasMessage("Source URI is required.");
     }
 }

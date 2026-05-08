@@ -4,7 +4,7 @@ import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
 import jakarta.inject.Singleton;
-import org.smilecz.mdharvester.commands.download.DownloadedMarkdownPage;
+import org.smilecz.mdharvester.cqrs.download.DownloadedMarkdownPage;
 
 @Singleton
 public final class MarkdownPageDownloadResponseFactory {

@@ -7,39 +7,39 @@ import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Error;
 import io.micronaut.http.annotation.Post;
-import org.smilecz.mdharvester.commands.CommandBus;
-import org.smilecz.mdharvester.commands.NoCommandHandlerException;
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageCommand;
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageException;
-import org.smilecz.mdharvester.commands.download.DownloadedMarkdownPage;
-import org.smilecz.mdharvester.commands.download.InvalidDownloadMarkdownPageCommandException;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageException;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageQuery;
+import org.smilecz.mdharvester.cqrs.download.DownloadedMarkdownPage;
+import org.smilecz.mdharvester.cqrs.download.InvalidDownloadMarkdownPageQueryException;
+import org.smilecz.mdharvester.cqrs.query.NoQueryHandlerException;
+import org.smilecz.mdharvester.cqrs.query.QueryBus;
 
 @Controller("/api/pages")
 public final class MarkdownPageDownloadController {
 
     private final MarkdownPageDownloadRequestMapper requestMapper;
-    private final CommandBus commandBus;
+    private final QueryBus queryBus;
     private final MarkdownPageDownloadResponseFactory responseFactory;
 
     public MarkdownPageDownloadController(
             MarkdownPageDownloadRequestMapper requestMapper,
-            CommandBus commandBus,
+            QueryBus queryBus,
             MarkdownPageDownloadResponseFactory responseFactory
     ) {
         this.requestMapper = requestMapper;
-        this.commandBus = commandBus;
+        this.queryBus = queryBus;
         this.responseFactory = responseFactory;
     }
 
     @Post(uri = "/download", consumes = MediaType.APPLICATION_JSON, produces = MarkdownMediaTypes.TEXT_MARKDOWN)
     public HttpResponse<String> download(@Body MarkdownPageDownloadRequest request) {
-        DownloadMarkdownPageCommand command = requestMapper.toCommand(request);
-        DownloadedMarkdownPage file = commandBus.dispatch(command);
+        DownloadMarkdownPageQuery query = requestMapper.toQuery(request);
+        DownloadedMarkdownPage file = queryBus.ask(query);
         return responseFactory.attachment(file);
     }
 
-    @Error(exception = InvalidDownloadMarkdownPageCommandException.class)
-    public HttpResponse<ApiErrorResponse> invalidRequest(InvalidDownloadMarkdownPageCommandException exception) {
+    @Error(exception = InvalidDownloadMarkdownPageQueryException.class)
+    public HttpResponse<ApiErrorResponse> invalidRequest(InvalidDownloadMarkdownPageQueryException exception) {
         return HttpResponse.badRequest(new ApiErrorResponse(exception.getMessage()))
                 .contentType(MediaType.of(MediaType.APPLICATION_JSON));
     }
@@ -51,8 +51,8 @@ public final class MarkdownPageDownloadController {
                 .contentType(MediaType.of(MediaType.APPLICATION_JSON));
     }
 
-    @Error(exception = NoCommandHandlerException.class)
-    public HttpResponse<ApiErrorResponse> missingHandler(NoCommandHandlerException exception) {
+    @Error(exception = NoQueryHandlerException.class)
+    public HttpResponse<ApiErrorResponse> missingHandler(NoQueryHandlerException exception) {
         return HttpResponse.serverError(new ApiErrorResponse(exception.getMessage()))
                 .contentType(MediaType.of(MediaType.APPLICATION_JSON));
     }

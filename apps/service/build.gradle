@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":modules:api"))
-    implementation(project(":modules:commands"))
+    implementation(project(":modules:cqrs"))
     implementation(project(":modules:scheduler"))
     implementation(project(":modules:downloader"))
     implementation(project(":modules:storage"))

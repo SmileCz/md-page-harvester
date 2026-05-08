@@ -6,7 +6,7 @@ Projekt je rozdeleny na jeden spustitelny Micronaut modul a nekolik knihovnich m
 
 `apps/service` je runtime aplikace. Obsahuje `Application`, konfiguraci, logovani a zavislosti na vsechny vnitrni moduly.
 
-`modules/commands` obsahuje spolecne command kontrakty a synchronni command bus. API vytvari commandy, implementacni moduly registruji handlery.
+`modules/cqrs` obsahuje spolecne CQRS kontrakty, synchronni command bus a query bus. API vytvari commandy nebo query, implementacni moduly registruji handlery.
 
 `modules/catalog` bude drzet model zdrojoveho projektu, cest k `.md` souborum a metadat stranek.
 
@@ -24,10 +24,10 @@ Projekt je rozdeleny na jeden spustitelny Micronaut modul a nekolik knihovnich m
 
 `modules/api` muze volat `modules/scheduler` a cist modely z `modules/catalog`.
 
-`modules/api` muze dispatchovat commandy pres `modules/commands`, ale nema obsahovat implementaci stahovani, ukladani ani planovani.
+`modules/api` muze dispatchovat commandy a query pres `modules/cqrs`, ale nema obsahovat implementaci stahovani, ukladani ani planovani.
 
 `modules/scheduler` muze skladat `modules/downloader`, `modules/storage` a `modules/catalog`.
 
 `modules/downloader` a `modules/storage` nemaji zaviset na `modules/api`.
 
-`modules/downloader` muze implementovat handlery commandu z `modules/commands`.
+`modules/downloader` muze implementovat handlery query nebo commandu z `modules/cqrs`.

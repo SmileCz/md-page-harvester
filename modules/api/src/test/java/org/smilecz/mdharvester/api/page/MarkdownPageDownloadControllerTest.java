@@ -6,28 +6,28 @@ import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
-import org.smilecz.mdharvester.commands.Command;
-import org.smilecz.mdharvester.commands.CommandBus;
-import org.smilecz.mdharvester.commands.NoCommandHandlerException;
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageCommand;
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageException;
-import org.smilecz.mdharvester.commands.download.DownloadedMarkdownPage;
-import org.smilecz.mdharvester.commands.download.InvalidDownloadMarkdownPageCommandException;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageException;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageQuery;
+import org.smilecz.mdharvester.cqrs.download.DownloadedMarkdownPage;
+import org.smilecz.mdharvester.cqrs.download.InvalidDownloadMarkdownPageQueryException;
+import org.smilecz.mdharvester.cqrs.query.NoQueryHandlerException;
+import org.smilecz.mdharvester.cqrs.query.Query;
+import org.smilecz.mdharvester.cqrs.query.QueryBus;
 import org.junit.jupiter.api.Test;
 
 final class MarkdownPageDownloadControllerTest {
 
-    private final CapturingCommandBus commandBus = new CapturingCommandBus(
+    private final CapturingQueryBus queryBus = new CapturingQueryBus(
             new DownloadedMarkdownPage("api-guide.md", "# Api Guide")
     );
     private final MarkdownPageDownloadController controller = new MarkdownPageDownloadController(
             new MarkdownPageDownloadRequestMapper(),
-            commandBus,
+            queryBus,
             new MarkdownPageDownloadResponseFactory()
     );
 
     @Test
-    void dispatchesDownloadCommandAndReturnsMarkdownFileAttachment() {
+    void dispatchesDownloadQueryAndReturnsMarkdownFileAttachment() {
         MarkdownPageDownloadRequest request =
                 new MarkdownPageDownloadRequest("https://example.com/docs/api-guide.md", "Api Guide", null);
 
@@ -39,16 +39,16 @@ final class MarkdownPageDownloadControllerTest {
         assertThat(response.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION))
                 .isEqualTo("attachment; filename=\"api-guide.md\"");
         assertThat(response.getHeaders().get(HttpHeaders.CACHE_CONTROL)).isEqualTo("no-store");
-        assertThat(commandBus.dispatchedCommand).isInstanceOfSatisfying(
-                DownloadMarkdownPageCommand.class,
-                command -> assertThat(command.sourceUri().toString()).isEqualTo("https://example.com/docs/api-guide.md")
+        assertThat(queryBus.dispatchedQuery).isInstanceOfSatisfying(
+                DownloadMarkdownPageQuery.class,
+                query -> assertThat(query.sourceUri().toString()).isEqualTo("https://example.com/docs/api-guide.md")
         );
     }
 
     @Test
     void mapsInvalidDownloadRequestToBadRequest() {
-        InvalidDownloadMarkdownPageCommandException exception =
-                new InvalidDownloadMarkdownPageCommandException("Source URI is required.");
+        InvalidDownloadMarkdownPageQueryException exception =
+                new InvalidDownloadMarkdownPageQueryException("Source URI is required.");
 
         HttpResponse<ApiErrorResponse> response = controller.invalidRequest(exception);
 
@@ -70,8 +70,8 @@ final class MarkdownPageDownloadControllerTest {
     }
 
     @Test
-    void mapsMissingCommandHandlerToServerError() {
-        NoCommandHandlerException exception = new NoCommandHandlerException(DownloadMarkdownPageCommand.class);
+    void mapsMissingQueryHandlerToServerError() {
+        NoQueryHandlerException exception = new NoQueryHandlerException(DownloadMarkdownPageQuery.class);
 
         HttpResponse<ApiErrorResponse> response = controller.missingHandler(exception);
 
@@ -79,19 +79,19 @@ final class MarkdownPageDownloadControllerTest {
         assertThat(response.getContentType()).contains(MediaType.of(MediaType.APPLICATION_JSON));
     }
 
-    private static final class CapturingCommandBus implements CommandBus {
+    private static final class CapturingQueryBus implements QueryBus {
 
         private final DownloadedMarkdownPage result;
-        private Command<?> dispatchedCommand;
+        private Query<?> dispatchedQuery;
 
-        private CapturingCommandBus(DownloadedMarkdownPage result) {
+        private CapturingQueryBus(DownloadedMarkdownPage result) {
             this.result = result;
         }
 
         @Override
         @SuppressWarnings("unchecked")
-        public <R> R dispatch(Command<R> command) {
-            dispatchedCommand = command;
+        public <R> R ask(Query<R> query) {
+            dispatchedQuery = query;
             return (R) result;
         }
     }

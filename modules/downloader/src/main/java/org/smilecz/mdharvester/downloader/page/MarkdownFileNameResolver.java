@@ -1,8 +1,8 @@
 package org.smilecz.mdharvester.downloader.page;
 
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageCommand;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageQuery;
 
 public interface MarkdownFileNameResolver {
 
-    String resolve(DownloadMarkdownPageCommand command);
+    String resolve(DownloadMarkdownPageQuery query);
 }

@@ -2,8 +2,8 @@ package org.smilecz.mdharvester.downloader.page;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.smilecz.mdharvester.commands.download.DownloadMarkdownPageCommand;
-import org.smilecz.mdharvester.commands.download.DownloadedMarkdownPage;
+import org.smilecz.mdharvester.cqrs.download.DownloadMarkdownPageQuery;
+import org.smilecz.mdharvester.cqrs.download.DownloadedMarkdownPage;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
 
@@ -17,13 +17,13 @@ final class DefaultMarkdownPageDownloaderTest {
 
     @Test
     void downloadsSourceContentAndReturnsNamedMarkdownPage() {
-        DownloadMarkdownPageCommand command = new DownloadMarkdownPageCommand(
+        DownloadMarkdownPageQuery query = new DownloadMarkdownPageQuery(
                 URI.create("https://example.com/docs/api-guide.md"),
                 null,
                 null
         );
 
-        DownloadedMarkdownPage page = downloader.download(command);
+        DownloadedMarkdownPage page = downloader.download(query);
 
         assertThat(sourceClient.sourceUri).isEqualTo(URI.create("https://example.com/docs/api-guide.md"));
         assertThat(page.fileName()).isEqualTo("api-guide.md");

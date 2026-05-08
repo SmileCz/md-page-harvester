@@ -18,4 +18,4 @@ Accept: text/markdown
 }
 ```
 
-Odpověď je `text/markdown` s hlavičkou `Content-Disposition: attachment`. Kontroler drží jen HTTP mapování a vytvoření commandu; samotné stažení i pojmenování výsledného souboru řeší `modules/downloader` přes společný `CommandBus`.
+Odpověď je `text/markdown` s hlavičkou `Content-Disposition: attachment`. Kontroler drží jen HTTP mapování a vytvoření query; samotné stažení i pojmenování výsledného souboru řeší `modules/downloader` přes společný `QueryBus`.

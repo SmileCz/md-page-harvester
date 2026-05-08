@@ -16,7 +16,7 @@ rootProject.name = "md-page-harvester"
 
 include(
     "apps:service",
-    "modules:commands",
+    "modules:cqrs",
     "modules:catalog",
     "modules:downloader",
     "modules:storage",
