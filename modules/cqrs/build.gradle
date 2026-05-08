@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     implementation("io.micronaut:micronaut-inject")
+    implementation("org.slf4j:slf4j-api")
 }

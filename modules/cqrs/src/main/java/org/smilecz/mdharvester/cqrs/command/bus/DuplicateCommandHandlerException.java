@@ -1,4 +1,4 @@
-package org.smilecz.mdharvester.cqrs.command;
+package org.smilecz.mdharvester.cqrs.command.bus;
 
 public final class DuplicateCommandHandlerException extends RuntimeException {
 

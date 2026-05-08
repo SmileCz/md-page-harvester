@@ -12,10 +12,10 @@ services:
       HTTP_PORT: 8080
       SOURCE_PROJECT_URI: ${SOURCE_PROJECT_URI:-}
       SOURCE_PROJECT_BRANCH: ${SOURCE_PROJECT_BRANCH:-main}
+      COMMAND_BUS_STORE_FILE: /data/command-bus/commands.bin
       PAGES_DIRECTORY: /data/pages
     volumes:
       - md_page_harvester_data:/data
 
 volumes:
   md_page_harvester_data:
-

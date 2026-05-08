@@ -10,9 +10,10 @@ endpoints:
     sensitive: false
 
 md-page-harvester:
+  command-bus:
+    store-file: ${COMMAND_BUS_STORE_FILE:build/command-bus/commands.bin}
   source-project:
     uri: ${SOURCE_PROJECT_URI:}
     branch: ${SOURCE_PROJECT_BRANCH:main}
   storage:
     pages-directory: ${PAGES_DIRECTORY:/data/pages}
-
