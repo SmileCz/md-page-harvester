@@ -1,0 +1,87 @@
+plugins {
+    id("io.micronaut.application") version "4.6.2" apply false
+    id("io.micronaut.library") version "4.6.2" apply false
+    id("com.gradleup.shadow") version "9.4.1" apply false
+}
+
+def javaVersion = 25
+def micronautProcessingAnnotations = "org.smilecz.mdharvester.*"
+def serdeJacksonProjects = [
+    ":apps:service",
+    ":modules:api",
+    ":modules:catalog",
+    ":modules:downloader",
+    ":modules:scheduler",
+    ":modules:storage"
+] as Set
+
+allprojects {
+    group = "org.smilecz"
+    version = "0.1.0-SNAPSHOT"
+}
+
+subprojects {
+    pluginManager.withPlugin("java") {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(javaVersion)
+            }
+        }
+
+        tasks.withType(JavaCompile).configureEach {
+            options.encoding = "UTF-8"
+            options.compilerArgs.add("-parameters")
+            options.release.set(javaVersion)
+        }
+
+        tasks.withType(Test).configureEach {
+            useJUnitPlatform()
+        }
+
+        dependencies {
+            testImplementation("org.junit.jupiter:junit-jupiter-api")
+            testImplementation("org.assertj:assertj-core:3.27.3")
+            testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+            testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+        }
+
+        if (serdeJacksonProjects.contains(path)) {
+            dependencies {
+                implementation("io.micronaut.serde:micronaut-serde-jackson")
+            }
+        }
+    }
+
+    pluginManager.withPlugin("io.micronaut.library") {
+        dependencies {
+            annotationProcessor("io.micronaut:micronaut-http-validation")
+            annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
+        }
+
+        micronaut {
+            testRuntime("junit5")
+            version(project.property("micronautVersion").toString())
+            processing {
+                incremental(true)
+                annotations(micronautProcessingAnnotations)
+            }
+        }
+    }
+
+    pluginManager.withPlugin("io.micronaut.application") {
+        dependencies {
+            annotationProcessor("io.micronaut:micronaut-http-validation")
+            annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
+        }
+
+        micronaut {
+            runtime("netty")
+            testRuntime("junit5")
+            version(project.property("micronautVersion").toString())
+            processing {
+                incremental(true)
+                annotations(micronautProcessingAnnotations)
+            }
+        }
+    }
+}

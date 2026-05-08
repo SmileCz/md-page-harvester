@@ -1,0 +1,32 @@
+plugins {
+    id("io.micronaut.application")
+    id("com.gradleup.shadow")
+}
+
+dependencies {
+    implementation(project(":modules:api"))
+    implementation(project(":modules:commands"))
+    implementation(project(":modules:scheduler"))
+    implementation(project(":modules:downloader"))
+    implementation(project(":modules:storage"))
+    implementation(project(":modules:catalog"))
+
+    implementation("io.micronaut:micronaut-management")
+
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("org.yaml:snakeyaml")
+
+    testImplementation("io.micronaut:micronaut-http-client")
+}
+
+application {
+    mainClass = "org.smilecz.mdharvester.Application"
+}
+
+tasks.named("shadowJar") {
+    archiveFileName = "md-page-harvester.jar"
+}
+
+tasks.named("dockerfile") {
+    baseImage = "eclipse-temurin:25-jre"
+}

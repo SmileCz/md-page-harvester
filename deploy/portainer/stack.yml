@@ -1,0 +1,18 @@
+services:
+  md-page-harvester:
+    image: ${IMAGE_NAME:-md-page-harvester:latest}
+    container_name: md-page-harvester
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    environment:
+      MICRONAUT_ENVIRONMENTS: docker
+      HTTP_PORT: 8080
+      SOURCE_PROJECT_URI: ${SOURCE_PROJECT_URI:-}
+      SOURCE_PROJECT_BRANCH: ${SOURCE_PROJECT_BRANCH:-main}
+      PAGES_DIRECTORY: /data/pages
+    volumes:
+      - md_page_harvester_data:/data
+
+volumes:
+  md_page_harvester_data:

@@ -1,0 +1,10 @@
+.gradle/
+build/
+**/build/
+out/
+.idea/
+*.iml
+*.log
+.DS_Store
+docker-compose.override.yml
+

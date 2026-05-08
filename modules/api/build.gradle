@@ -1,0 +1,8 @@
+plugins {
+    id("io.micronaut.library")
+}
+
+dependencies {
+    implementation(project(":modules:commands"))
+    implementation("io.micronaut:micronaut-http")
+}

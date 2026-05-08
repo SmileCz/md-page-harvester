@@ -1,0 +1,8 @@
+plugins {
+    id("io.micronaut.library")
+}
+
+dependencies {
+    implementation(project(":modules:catalog"))
+    implementation(project(":modules:commands"))
+}

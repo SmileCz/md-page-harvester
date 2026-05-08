@@ -1,0 +1,9 @@
+.gradle
+.git
+.idea
+build
+**/build
+*.iml
+*.log
+docker-compose.override.yml
+
