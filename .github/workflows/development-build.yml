@@ -12,6 +12,8 @@ permissions:
   contents: read
   checks: write
   pull-requests: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: development-build-${{ github.ref }}
@@ -89,6 +91,29 @@ jobs:
               summary.write("\n".join(lines) + "\n")
           PY
 
+      - name: Generate Allure report
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          mkdir -p build/allure-results
+          find apps modules -path "*/build/allure-results/*" -type f -print -exec cp {} build/allure-results/ \;
+          npx --yes allure-commandline@2.34.1 generate build/allure-results --clean -o build/reports/allure-report
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v6
+        if: ${{ !cancelled() }}
+        with:
+          use_oidc: true
+          fail_ci_if_error: true
+          files: >
+            ./apps/service/build/reports/jacoco/test/jacocoTestReport.xml,
+            ./modules/api/build/reports/jacoco/test/jacocoTestReport.xml,
+            ./modules/cqrs/build/reports/jacoco/test/jacocoTestReport.xml,
+            ./modules/downloader/build/reports/jacoco/test/jacocoTestReport.xml
+          flags: unit-tests
+          name: md-page-harvester-development
+          verbose: true
+
       - name: Upload test reports
         uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
@@ -108,3 +133,21 @@ jobs:
             coverage-summary.md
             **/build/reports/jacoco/test/**
           if-no-files-found: error
+
+      - name: Upload Allure report artifact
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: allure-report
+          path: build/reports/allure-report/**
+          if-no-files-found: error
+
+      - name: Upload Allure report to GitHub Pages
+        uses: actions/upload-pages-artifact@v5
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/development' }}
+        with:
+          path: build/reports/allure-report
+
+      - name: Deploy Allure report to GitHub Pages
+        uses: actions/deploy-pages@v5
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/development' }}

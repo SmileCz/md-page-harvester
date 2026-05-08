@@ -4,6 +4,7 @@ plugins {
     id("io.micronaut.application") version "4.6.2" apply false
     id("io.micronaut.library") version "4.6.2" apply false
     id("com.gradleup.shadow") version "9.4.1" apply false
+    id("io.qameta.allure-adapter") version "4.0.1" apply false
 }
 
 def javaVersion = 25
@@ -25,6 +26,7 @@ allprojects {
 subprojects {
     pluginManager.withPlugin("java") {
         apply plugin: "jacoco"
+        apply plugin: "io.qameta.allure-adapter"
 
         java {
             toolchain {
@@ -45,6 +47,18 @@ subprojects {
 
         jacoco {
             toolVersion = "0.8.14"
+        }
+
+        allure {
+            adapter {
+                allureJavaVersion = "2.34.0"
+                frameworks {
+                    junit5 {
+                        enabled = true
+                        autoconfigureListeners = true
+                    }
+                }
+            }
         }
 
         tasks.named("jacocoTestReport", JacocoReport).configure {
