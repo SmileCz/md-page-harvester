@@ -151,12 +151,23 @@ jobs:
           path: build/reports/allure-report/**
           if-no-files-found: error
 
+      - name: Note Allure Pages behavior
+        if: ${{ !cancelled() && vars.PUBLISH_ALLURE_PAGES != 'true' }}
+        run: |
+          {
+            echo "## Allure Report"
+            echo ""
+            echo "Allure report publishing to GitHub Pages is disabled. The HTML report is available as the allure-report workflow artifact."
+            echo ""
+            echo "Set repository variable PUBLISH_ALLURE_PAGES=true after enabling GitHub Pages with GitHub Actions as the source."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload Allure report to GitHub Pages
         uses: actions/upload-pages-artifact@v5
-        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/development' }}
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/development' && vars.PUBLISH_ALLURE_PAGES == 'true' }}
         with:
           path: build/reports/allure-report
 
       - name: Deploy Allure report to GitHub Pages
         uses: actions/deploy-pages@v5
-        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/development' }}
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/development' && vars.PUBLISH_ALLURE_PAGES == 'true' }}
