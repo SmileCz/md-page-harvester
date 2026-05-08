@@ -104,7 +104,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           use_oidc: true
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           files: >
             ./apps/service/build/reports/jacoco/test/jacocoTestReport.xml,
             ./modules/api/build/reports/jacoco/test/jacocoTestReport.xml,
@@ -113,6 +113,15 @@ jobs:
           flags: unit-tests
           name: md-page-harvester-development
           verbose: true
+
+      - name: Note Codecov behavior
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "## Codecov Upload"
+            echo ""
+            echo "Codecov upload is non-blocking. JaCoCo XML and HTML coverage reports are always uploaded as workflow artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload test reports
         uses: actions/upload-artifact@v7
