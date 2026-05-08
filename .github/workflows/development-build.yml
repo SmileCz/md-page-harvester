@@ -47,7 +47,7 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           check_name: Gradle Test Results
-          files: "**/build/test-results/test/TEST-*.xml"
+          files: "**/build/test-results/**/TEST-*.xml"
           comment_mode: off
 
       - name: Add coverage summary
@@ -120,8 +120,8 @@ jobs:
         with:
           name: test-reports
           path: |
-            **/build/reports/tests/test/**
-            **/build/test-results/test/**
+            **/build/reports/tests/**
+            **/build/test-results/**
           if-no-files-found: error
 
       - name: Upload coverage reports

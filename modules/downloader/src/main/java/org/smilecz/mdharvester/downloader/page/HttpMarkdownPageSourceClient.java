@@ -18,6 +18,7 @@ public final class HttpMarkdownPageSourceClient implements MarkdownPageSourceCli
     private static final String ACCEPT_MARKDOWN = "text/markdown, text/plain, */*";
 
     private final HttpClient httpClient;
+    private final ObsidianPublishMarkdownSourceResolver obsidianPublishResolver;
 
     public HttpMarkdownPageSourceClient() {
         this(HttpClient.newBuilder()
@@ -28,10 +29,18 @@ public final class HttpMarkdownPageSourceClient implements MarkdownPageSourceCli
 
     HttpMarkdownPageSourceClient(HttpClient httpClient) {
         this.httpClient = Objects.requireNonNull(httpClient, "httpClient");
+        this.obsidianPublishResolver = new ObsidianPublishMarkdownSourceResolver();
     }
 
     @Override
     public String fetch(URI sourceUri) {
+        String body = fetchBody(sourceUri);
+        return obsidianPublishResolver.resolve(sourceUri, body)
+                .map(this::fetchBody)
+                .orElse(body);
+    }
+
+    private String fetchBody(URI sourceUri) {
         HttpRequest request = HttpRequest.newBuilder(sourceUri)
                 .timeout(REQUEST_TIMEOUT)
                 .header("Accept", ACCEPT_MARKDOWN)
